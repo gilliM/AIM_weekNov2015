@@ -1,0 +1,5 @@
+* Some Stuff to Check out
+** Cambridge many-core group
+   Interactive flow solver using Lattice-Boltzmann method.  Comparison
+   between CPU only and CUDA implementation.  Code can be downloaded.
+   http://www.many-core.group.cam.ac.uk/projects/LBdemo.shtml
