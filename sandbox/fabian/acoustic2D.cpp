@@ -13,9 +13,15 @@
 #include <iomanip>
 #include <omp.h>
 
+#include "dumpHDF5.h"
+
 using namespace std;
 
+#ifdef _FLOAT_PRECISION_
 typedef float Real;
+#else
+typedef double Real;
+#endif
 
 
 // helpers
@@ -59,18 +65,18 @@ void _updateVelocity(vector<Real>& v, const vector<Real>& u, const Real dx2, con
 template <size_t _NX, size_t _NY>
 void _boundaryCondition(vector<Real>& u, const Real t, const Real gk, const Real gw)
 {
-    for (size_t j = 0; j < 1; ++j)
-        for (size_t i = 0; i < _NX/4; ++i)
-            u[i + j*_NX] = sin(gw*t + gk*i)*cos(gw*t + gk*j);
+    /* for (size_t j = 0; j < 1; ++j) */
+    for (size_t i = 0; i < _NX/4; ++i)
+        u[i] = sin(gw*t + gk*i)*cos(gw*t + gk*0);
 
     for (size_t j = 0; j < _NY/4; ++j)
-        for (size_t i = 0; i < 1; ++i)
-            u[i + j*_NX] = sin(gw*t + gk*i)*cos(gw*t + gk*j);
+        /* for (size_t i = 0; i < 1; ++i) */
+        u[0 + j*_NX] = sin(gw*t + gk*j)*cos(gw*t + gk*0);
 }
 
 
 template <size_t _NX, size_t _NY>
-void _dumpASCII(const string& fname, vector<Real>& u, const Real t)
+void _dumpASCII(const string& fname, const vector<Real>& u, const Real t)
 {
     ofstream o(fname.c_str(), std::ios::out);
     o << "# Time = " << t << endl;
@@ -92,7 +98,8 @@ int main(int argc, char** argv)
 
     // wave constants
     const Real gc = 100.0;
-    const Real gk = 6.28/367.0;
+    /* const Real gk = 6.28/367.0; */
+    const Real gk = 6.28/1000.;
     const Real gw = gk*gc;
 
     // simulation parameter
@@ -125,11 +132,12 @@ int main(int argc, char** argv)
         t += dtMax;
         ++step;
 
-        if (step%100 == 0)
+        if (step%10 == 0)
         {
             ostringstream fname;
             fname << "amplitude_" << setw(5) << setfill('0') << step << ".dat";
-            _dumpASCII<NX,NY>(fname.str(), amp, t);
+            /* _dumpASCII<NX,NY>(fname.str(), amp, t); */
+            dumpHDF5<NX,NY,1>(fname.str(), amp, t);
         }
 
         // update boundary

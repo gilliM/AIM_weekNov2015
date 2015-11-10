@@ -1,2 +1,5 @@
 *.dat
 acoustic2D
+*.h5
+*.xmf
+*.dSYM
