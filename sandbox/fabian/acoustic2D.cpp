@@ -132,6 +132,7 @@ int main(int argc, char** argv)
             vel[i + j*NX] = 0.0;
             amp[i + j*NX] = 0.0;
         }
+    /* amp[2+2*NX] = 1.0; */
 
     Real t = 0.0;
     size_t step = 0;
