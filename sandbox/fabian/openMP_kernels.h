@@ -25,6 +25,9 @@ void _updateVelocity(vector<Real>& v, const vector<Real>& u, const Real dx2, con
     assert(u.size() == _NX*_NY);
     assert(u.size() == v.size());
 
+    const Real dx2Inv = static_cast<Real>(1.0/dx2);
+    const Real dy2Inv = static_cast<Real>(1.0/dy2);
+
     // stencil update
 #pragma omp parallel for
     for (size_t j = 1; j < _NY-1; ++j)
@@ -37,8 +40,8 @@ void _updateVelocity(vector<Real>& v, const vector<Real>& u, const Real dx2, con
             const size_t jm1 = i + (j-1)*_NX;
 
             v[i + j*_NX] += dt*gc*(
-                    (u[jp1] - static_cast<Real>(2.0)*u[i0] + u[jm1])/dx2 +
-                    (u[ip1] - static_cast<Real>(2.0)*u[i0] + u[im1])/dy2);
+                    (u[jp1] - static_cast<Real>(2.0)*u[i0] + u[jm1])*dx2Inv +
+                    (u[ip1] - static_cast<Real>(2.0)*u[i0] + u[im1])*dy2Inv);
         }
 }
 
@@ -46,12 +49,11 @@ void _updateVelocity(vector<Real>& v, const vector<Real>& u, const Real dx2, con
 template <size_t _NX, size_t _NY>
 void _boundaryCondition(vector<Real>& u, const Real t, const Real gk, const Real gw)
 {
-    /* for (size_t j = 0; j < 1; ++j) */
+    // oscillator lower left corner
     for (size_t i = 0; i < _NX/4; ++i)
         u[i] = sin(gw*t + gk*i)*cos(gw*t + gk*0);
 
     for (size_t j = 0; j < _NY/4; ++j)
-        /* for (size_t i = 0; i < 1; ++i) */
         u[0 + j*_NX] = sin(gw*t + gk*j)*cos(gw*t + gk*0);
 }
 
