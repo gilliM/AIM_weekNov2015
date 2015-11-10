@@ -32,6 +32,7 @@ typedef double Real;
 #endif /* _NY_ */
 
 
+///////////////////////////////////////////////////////////////////////////////
 // helpers
 template <size_t _NX, size_t _NY>
 void _updateAmplitude(vector<Real>& u, const vector<Real>& v, const Real dt)
@@ -96,6 +97,7 @@ void _dumpASCII(const string& fname, const vector<Real>& u, const Real t)
     }
     o.close();
 }
+///////////////////////////////////////////////////////////////////////////////
 
 
 int main(int argc, char** argv)
