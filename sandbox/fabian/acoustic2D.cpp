@@ -92,7 +92,7 @@ int main(int argc, char** argv)
         if (bIO && (step%10 == 0))
         {
             ostringstream fname;
-            fname << "amplitude_" << setw(5) << setfill('0') << step << ".dat";
+            fname << "amplitude_" << setw(6) << setfill('0') << step << ".dat";
             if (parser.check("-hdf"))  // dump HDF5
                 dumpHDF5<NX,NY,1>(fname.str(), amp, t);
             else // ASCII else
