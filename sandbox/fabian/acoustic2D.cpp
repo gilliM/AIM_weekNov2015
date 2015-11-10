@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <omp.h>
 
+#include "ArgumentParser.h"
 #include "dumpHDF5.h"
 
 using namespace std;
@@ -22,6 +23,13 @@ typedef float Real;
 #else
 typedef double Real;
 #endif
+
+#ifndef _NX_
+#define _NX_ 256
+#endif /* _NX_ */
+#ifndef _NY_
+#define _NY_ 256
+#endif /* _NY_ */
 
 
 // helpers
@@ -92,21 +100,24 @@ void _dumpASCII(const string& fname, const vector<Real>& u, const Real t)
 
 int main(int argc, char** argv)
 {
+    ArgumentParser parser(argc, (const char**)argv);
+
+    const bool bIO = parser("-IO").asBool(true);
+
     // global constants
-    const size_t NX = 256; // x-nodes
-    const size_t NY = 256; // y-nodes
+    const size_t NX = _NX_; // x-nodes
+    const size_t NY = _NY_; // y-nodes
 
     // wave constants
-    const Real gc = 100.0;
-    /* const Real gk = 6.28/367.0; */
-    const Real gk = 6.28/1000.;
+    const Real gc = parser("-gc").asDouble(100.0);
+    const Real gk = parser("-gk").asDouble(6.28/1000.);
     const Real gw = gk*gc;
 
     // simulation parameter
-    const Real dx2 = 1.0;
-    const Real dy2 = 1.0;
-    const Real dt  = 0.01;
-    const Real tEnd = 100.0;
+    const Real dx2 = parser("-dx2").asDouble(1.0);
+    const Real dy2 = parser("-dy2").asDouble(1.0);
+    const Real dt  = parser("-dt").asDouble(0.01);
+    const Real tEnd = parser("-tEnd").asDouble(100.0);
 
     vector<Real> vel(NX*NY); // velocity
     vector<Real> amp(NX*NY); // amplitude
@@ -122,6 +133,8 @@ int main(int argc, char** argv)
 
     Real t = 0.0;
     size_t step = 0;
+
+    // main loop over time
     while (t < tEnd)
     {
         const Real dtMax = (tEnd-t) < dt ? (tEnd-t) : dt;
@@ -132,12 +145,15 @@ int main(int argc, char** argv)
         t += dtMax;
         ++step;
 
-        if (step%10 == 0)
+        // dump stuff
+        if (bIO && (step%10 == 0))
         {
             ostringstream fname;
             fname << "amplitude_" << setw(5) << setfill('0') << step << ".dat";
-            /* _dumpASCII<NX,NY>(fname.str(), amp, t); */
-            dumpHDF5<NX,NY,1>(fname.str(), amp, t);
+            if (parser.check("-hdf"))  // dump HDF5
+                dumpHDF5<NX,NY,1>(fname.str(), amp, t);
+            else // ASCII else
+                _dumpASCII<NX,NY>(fname.str(), amp, t);
         }
 
         // update boundary
